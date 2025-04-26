@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Article - Page 1</title>
+    <link rel="stylesheet" href="math-boxes.css">
+    <script src="math-boxes.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .container {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mathematical Concepts - Page 1</h1>
+    
+    <nav>
+        <a href="index.html">Page 1</a> | 
+        <a href="page2.html">Page 2</a>
+    </nav>
+    
+    <div class="container">
+        <div class="mbox axm" id="euclidean_parallel" data-subtitle="Parallel Postulate">
+            <p>Given a line and a point not on the line, there exists exactly one line through the point that is parallel to the given line.</p>
+        </div>
+        
+        <div class="mbox dfn" id="group_def" data-subtitle="Group">
+            <p>A group $(G, \cdot)$ is a set $G$ with a binary operation $\cdot$ satisfying the following properties:
+                <ol>
+                    <li>Closure: For all $a, b \in G$, $a \cdot b \in G$.</li>
+                    <li>Associativity: For all $a, b, c \in G$, $(a \cdot b) \cdot c = a \cdot (b \cdot c)$.</li>
+                    <li>Identity: There exists an element $e \in G$ such that $e \cdot a = a \cdot e = a$ for all $a \in G$.</li>
+                    <li>Inverse: For each $a \in G$, there exists an element $a^{-1} \in G$ such that $a \cdot a^{-1} = a^{-1} \cdot a = e$.</li>
+                </ol>
+            </p>
+        </div>
+
+        <p>As stated in <a href="#euclidean_parallel"></a>, there is only one parallel line through a given point. We can use this to prove several theorems in geometry.</p>
+        
+        <div class="mbox thm" id="bol_wei" data-subtitle="Bolzano-Weierstrass">
+            <p>Every bounded sequence in $\mathbb{R}^n$ has a convergent subsequence.</p>
+            <div class="proof">
+                <p>Let $(x_n)$ be a bounded sequence in $\mathbb{R}^n$. Then there exists $M > 0$ such that $\|x_n\| \leq M$ for all $n \in \mathbb{N}$.</p>
+                <p>We can use the nested intervals property to extract a convergent subsequence. First, divide the closed ball of radius $M$ centered at the origin into finitely many closed subsets. At least one of these subsets must contain infinitely many terms of the sequence...</p>
+                <p>Continuing this process yields a Cauchy subsequence, which must converge in $\mathbb{R}^n$.</p>
+            </div>
+        </div>
+
+        <p>The <a href="#bol_wei">Bolzano-Weierstrass theorem</a> is fundamental in analysis. Let's see an application:</p>
+        
+        <div class="mbox ex" id="bw_application">
+            <p>Consider the sequence $a_n = \cos(n)$ for $n \in \mathbb{N}$. This sequence is bounded since $|\cos(n)| \leq 1$ for all $n$. By <a href="#bol_wei"></a>, there exists a convergent subsequence.</p>
+        </div>
+        
+        <h2>Cross-page References</h2>
+        <p>On Page 2, you can find <a href="page2.html#mean_value"></a> which is important for differential calculus.</p>
+        <p>For more details about limits, check the <a href="page2.html#limit_def">definition of limits</a> on the next page.</p>
+        
+        <p>Let's also refer to a non-existent theorem: <a href="#non_existent"></a> to see the error handling.</p>
+        <p>And a non-existent theorem on another page: <a href="page2.html#non_existent_remote"></a>.</p>
+    </div>
+</body>
+</html>
