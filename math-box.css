@@ -1,0 +1,84 @@
+/* Base styles for the math boxes */
+.mbox {
+    margin: 1.5rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    position: relative;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.mbox::before {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Proof section styles */
+.proof {
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid #ddd;
+    display: none; /* Hide by default */
+}
+
+.proof.expanded {
+    display: block; /* Show when expanded */
+}
+
+.proof-toggle {
+    cursor: pointer;
+    color: #666;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 0.5rem;
+    user-select: none;
+}
+
+.proof-toggle:hover {
+    text-decoration: underline;
+}
+
+/* Cross-reference tooltips */
+.ref-tooltip {
+    position: absolute;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    max-width: 300px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.ref-tooltip.visible {
+    opacity: 1;
+}
+
+/* Error style for invalid references */
+.reference-error {
+    color: #f5222d;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+/* Cross-page reference styles */
+.cross-page-ref {
+    color: #1890ff;
+    text-decoration: none;
+    border-bottom: 1px dashed #1890ff;
+}
+
+.cross-page-ref:hover {
+    color: #40a9ff;
+}
+
+/* Loading indicator for cross-page tooltips */
+.loading-tooltip {
+    padding: 0.25rem 0.5rem;
+    font-style: italic;
+    color: #666;
+}
