@@ -151,28 +151,32 @@ function processCrossPageReference(link) {
     // Add class for cross-page styling
     link.classList.add('cross-page-ref');
 
-    // Pre-fetch the reference data immediately (not just on hover)
+    // Populate text immediately (async)
     (async () => {
         try {
             const refInfo = await fetchCrossPageReference(pagePath, fragment);
             if (refInfo) {
-                // Set the link text to the reference's title
-                link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
+                // Set text content if empty
+                if (!link.textContent || link.textContent === '') {
+                    link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
+                }
             } else {
-                link.textContent = 'Invalid Reference';
+                // Handle invalid reference
                 link.classList.add('reference-error');
+                link.textContent = 'Invalid Reference';
             }
         } catch (error) {
-            link.textContent = 'Error';
+            link.classList.add('reference-error');
+            link.textContent = 'Invalid Reference';
         }
     })();
 
-    // Keep the existing mouseover/mouseout handlers for tooltips
+    // Tooltip behavior remains the same
     link.addEventListener('mouseover', async (e) => {
-        // ... (existing tooltip logic remains unchanged)
+        // ... (existing tooltip code)
     });
     link.addEventListener('mouseout', () => {
-        // ... (existing tooltip cleanup)
+        tooltip.classList.remove('visible');
     });
 }
 
