@@ -183,16 +183,24 @@ function processCrossPageReference(link) {
 
 // Fetch reference info from another page
 async function fetchCrossPageReference(pagePath, fragment) {
+    // Check cache first
     const cacheKey = `${pagePath}#${fragment}`;
-    if (crossPageCache[cacheKey]) return crossPageCache[cacheKey];
+    if (crossPageCache[cacheKey]) {
+        return crossPageCache[cacheKey];
+    }
 
     try {
+        // This uses the fetch API to get the HTML of the target page
         const response = await fetch(pagePath);
         if (!response.ok) throw new Error(`Failed to load ${pagePath}`);
+
         const html = await response.text();
+
+        // Create a temporary DOM to parse the HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
+<<<<<<< HEAD
         // Find the target element
         const targetElement = doc.getElementById(fragment);
         if (!targetElement || !targetElement.classList.contains('mbox')) return null;
@@ -225,6 +233,64 @@ async function fetchCrossPageReference(pagePath, fragment) {
 
         crossPageCache[cacheKey] = refInfo;
         return refInfo;
+=======
+        // Look for the registry data
+        const registryScript = doc.querySelector('script[data-math-registry]');
+        let registry = null;
+
+        if (registryScript) {
+            // The registry is directly available as JSON
+            try {
+                registry = JSON.parse(registryScript.textContent);
+            } catch (e) {
+                console.error('Failed to parse registry JSON:', e);
+            }
+        } else {
+            // Extract the registry from the target document
+            // In a real implementation, you might want to expose the registry via a data attribute
+            // or a global variable in a more robust way
+            const targetElement = doc.getElementById(fragment);
+
+            if (targetElement && targetElement.classList.contains('mbox')) {
+                // Manual extraction of reference info
+                const typeClass = Array.from(targetElement.classList).find(cls => boxTypes[cls]);
+                if (typeClass) {
+                    // This is a simplified extraction - in production you'd want more robust parsing
+                    const strongElement = targetElement.querySelector('strong');
+                    const titleMatch = strongElement ? strongElement.textContent.match(/^(.*)\s(\d+)(?:\s\((.*)\))?\./) : null;
+
+                    if (titleMatch) {
+                        const type = typeClass;
+                        const number = parseInt(titleMatch[2]);
+                        const subtitle = titleMatch[3] || null;
+                        const titleText = subtitle ? `${boxTypes[type].name} ${number} (${subtitle})` : `${boxTypes[type].name} ${number}`;
+
+                        // Get content (first paragraph or div)
+                        const contentElement = targetElement.querySelector('p, div:not(.proof)');
+                        const content = contentElement ? contentElement.innerHTML : '';
+
+                        registry = {
+                            [fragment]: {
+                                number,
+                                type,
+                                title: titleText,
+                                subtitle,
+                                content
+                            }
+                        };
+                    }
+                }
+            }
+        }
+
+        if (registry && registry[fragment]) {
+            // Cache the result
+            crossPageCache[cacheKey] = registry[fragment];
+            return registry[fragment];
+        }
+
+        return null;
+>>>>>>> parent of de8ac00 (Update math-box.js)
     } catch (error) {
         console.error('Error fetching cross-page reference:', error);
         return null;
