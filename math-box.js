@@ -181,7 +181,6 @@ function processCrossPageReference(link) {
     });
 }
 
-// Fetch reference info from another page
 async function fetchCrossPageReference(pagePath, fragment) {
     const cacheKey = `${pagePath}#${fragment}`;
     if (crossPageCache[cacheKey]) return crossPageCache[cacheKey];
@@ -195,24 +194,30 @@ async function fetchCrossPageReference(pagePath, fragment) {
 
         // Find the target element
         const targetElement = doc.getElementById(fragment);
-        if (!targetElement || !targetElement.classList.contains('mbox')) return null;
+        if (!targetElement || !targetElement.classList.contains('mbox')) {
+            return null;
+        }
 
-        // Extract data from the element
+        // Determine the box type (axm, dfn, thm, etc.)
         const typeClass = Array.from(targetElement.classList)
             .find(cls => boxTypes[cls]);
         if (!typeClass) return null;
 
+        // Extract subtitle from data-subtitle attribute
         const subtitle = targetElement.getAttribute('data-subtitle') || '';
-        const contentElement = targetElement.querySelector('p, div:not(.proof)');
-        const content = contentElement ? contentElement.innerHTML : '';
-
-        // Determine the box's number by counting all .mbox elements before it
+        
+        // Calculate the box's number by counting preceding .mbox elements
         const mboxElements = Array.from(doc.querySelectorAll('.mbox'));
         const index = mboxElements.indexOf(targetElement);
         const number = index + 1; // 1-based numbering
 
-        const titleText = subtitle 
-            ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+        // Extract content (first paragraph or non-proof div)
+        const contentElement = targetElement.querySelector('p, div:not(.proof)');
+        const content = contentElement ? contentElement.innerHTML : '';
+
+        // Build the title text
+        const titleText = subtitle
+            ? `${boxTypes[typeClass].name} ${number} (${subtitle})`
             : `${boxTypes[typeClass].name} ${number}`;
 
         const refInfo = {
