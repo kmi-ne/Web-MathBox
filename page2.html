@@ -3,58 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Theorems - Page 2</title>
-    <link rel="stylesheet" href="math-box.css">
-    <script src="math-box.js"></script>
+    <title>Math Article - Page 2</title>
+    <link rel="stylesheet" href="math-boxes.css">
+    <script src="math-boxes.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .container {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
     <h1>Mathematical Concepts - Page 2</h1>
     
-    <div class="mbox thm" id="rolle" data-subtitle="Rolle's Theorem">
-        <p>Let $f: [a, b] \to \mathbb{R}$ be continuous on $[a, b]$ and differentiable on $(a, b)$. If $f(a) = f(b)$, then there exists a point $c \in (a, b)$ such that $f'(c) = 0$.</p>
-        <div class="proof">
-            <p>Since $f$ is continuous on the closed interval $[a, b]$, by the extreme value theorem, $f$ attains its maximum and minimum values on $[a, b]$.</p>
-            <p>If $f$ is constant on $[a, b]$, then $f'(x) = 0$ for all $x \in (a, b)$, and we can choose any $c \in (a, b)$.</p>
-            <p>If $f$ is not constant, then either its maximum or minimum must occur at some point $c \in (a, b)$ (since $f(a) = f(b)$).</p>
-            <p>At such a point $c$, we have $f'(c) = 0$ by Fermat's theorem.</p>
+    <nav>
+        <a href="index.html">Page 1</a> | 
+        <a href="page2.html">Page 2</a>
+    </nav>
+    
+    <div class="container">
+        <div class="mbox dfn" id="limit_def" data-subtitle="Limit">
+            <p>We say that $\lim_{x \to a} f(x) = L$ if for every $\varepsilon > 0$, there exists a $\delta > 0$ such that for all $x$ with $0 < |x - a| < \delta$, we have $|f(x) - L| < \varepsilon$.</p>
         </div>
-    </div>
-    
-    <div class="mbox thm" id="mean_value" data-subtitle="Mean Value Theorem">
-        <p>Let $f: [a, b] \to \mathbb{R}$ be continuous on $[a, b]$ and differentiable on $(a, b)$. Then there exists a point $c \in (a, b)$ such that $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
-        <div class="proof">
-            <p>Define a new function $g(x) = f(x) - \frac{f(b) - f(a)}{b - a}(x - a) - f(a)$.</p>
-            <p>Then $g$ is continuous on $[a, b]$ and differentiable on $(a, b)$.</p>
-            <p>Furthermore, $g(a) = f(a) - f(a) = 0$ and $g(b) = f(b) - \frac{f(b) - f(a)}{b - a}(b - a) - f(a) = 0$.</p>
-            <p>By <a href="#rolle"></a>, there exists $c \in (a, b)$ such that $g'(c) = 0$.</p>
-            <p>Since $g'(x) = f'(x) - \frac{f(b) - f(a)}{b - a}$, we have $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
+        
+        <div class="mbox thm" id="mean_value" data-subtitle="Mean Value Theorem">
+            <p>Let $f: [a, b] \to \mathbb{R}$ be continuous on $[a, b]$ and differentiable on $(a, b)$. Then there exists at least one point $c \in (a, b)$ such that $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
+            <div class="proof">
+                <p>Define the function $g(x) = f(x) - f(a) - \frac{f(b) - f(a)}{b - a}(x - a)$.</p>
+                <p>Then $g(a) = g(b) = 0$, and $g$ is continuous on $[a, b]$ and differentiable on $(a, b)$.</p>
+                <p>By Rolle's Theorem, there exists $c \in (a, b)$ such that $g'(c) = 0$.</p>
+                <p>But $g'(x) = f'(x) - \frac{f(b) - f(a)}{b - a}$, so $g'(c) = 0$ implies $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
+            </div>
         </div>
-    </div>
-    
-    <div class="mbox thm" id="intermediate_value" data-subtitle="Intermediate Value Theorem">
-        <p>If $f: [a, b] \to \mathbb{R}$ is continuous and $f(a) < k < f(b)$ (or $f(a) > k > f(b)$), then there exists a point $c \in (a, b)$ such that $f(c) = k$.</p>
-        <div class="proof">
-            <p>Let $S = \{x \in [a, b] : f(x) \leq k\}$.</p>
-            <p>Since $f(a) < k$, we know that $a \in S$, so $S$ is non-empty.</p>
-            <p>Since $f(b) > k$, we know that $b \notin S$, so $S$ is bounded above by $b$.</p>
-            <p>By the completeness of the real numbers, $S$ has a supremum $c = \sup S$.</p>
-            <p>We claim that $f(c) = k$.</p>
-            <p>If $f(c) < k$, then by continuity of $f$, there exists $\delta > 0$ such that $f(x) < k$ for all $x \in (c - \delta, c + \delta) \cap [a, b]$.</p>
-            <p>But this means that $c + \min(\delta/2, b-c) \in S$, contradicting that $c = \sup S$.</p>
-            <p>If $f(c) > k$, then by continuity of $f$, there exists $\delta > 0$ such that $f(x) > k$ for all $x \in (c - \delta, c + \delta) \cap [a, b]$.</p>
-            <p>But this means that $\sup S \leq c - \delta < c$, contradicting that $c = \sup S$.</p>
-            <p>Therefore, $f(c) = k$.</p>
+        
+        <div class="mbox ex" id="mvt_example">
+            <p>Consider $f(x) = x^2$ on $[0, 1]$. Then $f'(x) = 2x$ and $\frac{f(1) - f(0)}{1 - 0} = 1 - 0 = 1$.</p>
+            <p>By <a href="#mean_value"></a>, there exists $c \in (0, 1)$ such that $f'(c) = 1$, which means $2c = 1$, so $c = \frac{1}{2}$.</p>
         </div>
+        
+        <h2>Cross-page References</h2>
+        <p>Going back to Page 1, we can refer to <a href="index.html#bol_wei"></a> which complements our discussion of calculus.</p>
+        <p>The concept of <a href="index.html#group_def">mathematical groups</a> from Page 1 is also relevant for advanced analysis.</p>
+        
+        <div class="mbox thm" id="extreme_value" data-subtitle="Extreme Value Theorem">
+            <p>If $f: [a, b] \to \mathbb{R}$ is continuous on the closed, bounded interval $[a, b]$, then $f$ attains both a maximum and minimum value on $[a, b]$.</p>
+            <div class="proof">
+                <p>Since $f$ is continuous on the compact set $[a, b]$, the image $f([a, b])$ is also compact in $\mathbb{R}$.</p>
+                <p>A compact subset of $\mathbb{R}$ is closed and bounded. A closed and bounded subset of $\mathbb{R}$ contains its supremum and infimum.</p>
+                <p>Therefore, $f$ attains its maximum and minimum values on $[a, b]$.</p>
+            </div>
+        </div>
+        
+        <p>Using <a href="#extreme_value"></a> and <a href="#mean_value"></a>, we can derive many important results in calculus.</p>
+        <p>For instance, the <a href="index.html#bol_wei">Bolzano-Weierstrass theorem</a> is used in the proof of the Extreme Value Theorem.</p>
     </div>
-
-    <h2>Cross-Page References</h2>
-    
-    <p>According to <a href="page1.html#bol_wei"></a>, every bounded sequence has a convergent subsequence.</p>
-    
-    <p>The <a href="page1.html#group_def">Group definition</a> is fundamental in abstract algebra.</p>
-    
-    <p>Let's try a reference to a non-existent definition: <a href="page1.html#non_existent"></a>.</p>
-    
-    <p><a href="page1.html">Go back to Page 1</a></p>
 </body>
 </html>
