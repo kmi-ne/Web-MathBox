@@ -181,6 +181,7 @@ function processCrossPageReference(link) {
     });
 }
 
+// Fetch reference info from another page
 async function fetchCrossPageReference(pagePath, fragment) {
     const cacheKey = `${pagePath}#${fragment}`;
     if (crossPageCache[cacheKey]) return crossPageCache[cacheKey];
@@ -192,55 +193,50 @@ async function fetchCrossPageReference(pagePath, fragment) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // Find the target element
-        const targetElement = doc.getElementById(fragment);
-        if (!targetElement || !targetElement.classList.contains('mbox')) {
-            return null;
-        }
-
-        // Determine the box type (axm, dfn, thm, etc.)
-        const typeClass = Array.from(targetElement.classList)
-            .find(cls => boxTypes[cls]);
-        if (!typeClass) return null;
-
-        // Extract subtitle from data-subtitle attribute
-        const subtitle = targetElement.getAttribute('data-subtitle') || '';
-        
-        // Calculate the box's number by counting preceding .mbox elements
+        // Build registry from raw .mbox elements (without relying on dynamic content)
         const mboxElements = Array.from(doc.querySelectorAll('.mbox'));
-        const index = mboxElements.indexOf(targetElement);
-        const number = index + 1; // 1-based numbering
+        const tempRegistry = {};
 
-        // Extract content (first paragraph or non-proof div)
-        const contentElement = targetElement.querySelector('p, div:not(.proof)');
-        const content = contentElement ? contentElement.innerHTML : '';
+        mboxElements.forEach((element, index) => {
+            const id = element.id;
+            const typeClass = Array.from(element.classList)
+                .find(cls => boxTypes[cls]);
+            if (!typeClass || !id) return;
 
-        // Build the title text
-        const titleText = subtitle
-            ? `${boxTypes[typeClass].name} ${number} (${subtitle})`
-            : `${boxTypes[typeClass].name} ${number}`;
+            const subtitle = element.getAttribute('data-subtitle') || '';
+            const number = index + 1; // 1-based numbering
+            const titleText = subtitle 
+                ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+                : `${boxTypes[typeClass].name} ${number}`;
 
-        const refInfo = {
-            number,
-            type: typeClass,
-            title: titleText,
-            subtitle,
-            content
-        };
+            // Extract content (first paragraph or non-proof div)
+            const contentElement = element.querySelector('p, div:not(.proof)');
+            const content = contentElement ? contentElement.innerHTML : '';
 
-        crossPageCache[cacheKey] = refInfo;
-        return refInfo;
+            tempRegistry[id] = {
+                number,
+                type: typeClass,
+                title: titleText,
+                subtitle,
+                content
+            };
+        });
+
+        if (tempRegistry[fragment]) {
+            crossPageCache[cacheKey] = tempRegistry[fragment];
+            return tempRegistry[fragment];
+        }
+        return null;
     } catch (error) {
         console.error('Error fetching cross-page reference:', error);
         return null;
     }
 }
-
 // Helper to position the tooltip
 function positionTooltip(link) {
     const rect = link.getBoundingClientRect();
-    tooltip.style.left = `${rect.left}px`;
-    tooltip.style.top = `${rect.bottom + 5 + window.scrollY}px`;
+    tooltip.style.left = `${rect.left + window.scrollX}px`;
+    tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
 }
 
 // Export registry data for cross-page references
