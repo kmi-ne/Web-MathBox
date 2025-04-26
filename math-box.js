@@ -145,36 +145,65 @@ function processInternalReference(link) {
 function processCrossPageReference(link) {
     const href = link.getAttribute('href');
     if (!href.includes('#')) return; // Need a fragment identifier
+
     const [pagePath, fragment] = href.split('#');
     if (!fragment) return; // Need a valid fragment
 
     // Add class for cross-page styling
     link.classList.add('cross-page-ref');
 
-    // Populate text immediately (async)
-    (async () => {
+    // If anchor is empty, pre-fetch its title so it becomes hoverable
+    if (!link.textContent.trim()) {
+        fetchCrossPageReference(pagePath, fragment)
+            .then(refInfo => {
+                if (refInfo) {
+                    link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
+                } else {
+                    link.classList.add('reference-error');
+                    link.textContent = 'Invalid Reference';
+                }
+            })
+            .catch(() => {
+                link.classList.add('reference-error');
+                link.textContent = 'Error';
+            });
+    }
+
+    // Add tooltip behavior
+    link.addEventListener('mouseover', async (e) => {
+        // Show loading tooltip
+        tooltip.innerHTML = `<div class="loading-tooltip">Loading reference from ${pagePath}...</div>`;
+        tooltip.classList.add('visible');
+        positionTooltip(link);
+
+        // Try to get reference info
         try {
             const refInfo = await fetchCrossPageReference(pagePath, fragment);
+
             if (refInfo) {
-                // Set text content if empty
-                if (!link.textContent || link.textContent === '') {
+                // Update tooltip with reference info
+                tooltip.innerHTML = `<strong>${refInfo.title}</strong><br>${refInfo.content}`;
+                positionTooltip(link);
+
+                // If link has no text content, set it to the reference title
+                if (!link.textContent.trim()) {
                     link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
                 }
             } else {
-                // Handle invalid reference
-                link.classList.add('reference-error');
-                link.textContent = 'Invalid Reference';
+                // Reference not found
+                tooltip.innerHTML = `<div class="loading-tooltip">Reference not found on ${pagePath}</div>`;
+
+                // Mark as error if it has no custom text
+                if (!link.textContent.trim()) {
+                    link.classList.add('reference-error');
+                    link.textContent = 'Invalid Reference';
+                }
             }
         } catch (error) {
-            link.classList.add('reference-error');
-            link.textContent = 'Invalid Reference';
+            tooltip.innerHTML = `<div class="loading-tooltip">Error loading reference: ${error.message}</div>`;
         }
-    })();
-
-    // Tooltip behavior remains the same
-    link.addEventListener('mouseover', async (e) => {
-        // ... (existing tooltip code)
     });
+
     link.addEventListener('mouseout', () => {
         tooltip.classList.remove('visible');
     });
@@ -204,8 +233,8 @@ async function fetchCrossPageReference(pagePath, fragment) {
 
             const subtitle = element.getAttribute('data-subtitle') || '';
             const number = index + 1; // Numbering starts at 1
-            const titleText = subtitle 
-                ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+            const titleText = subtitle
+                ? `${boxTypes[typeClass].name} ${number} (${subtitle})`
                 : `${boxTypes[typeClass].name} ${number}`;
 
             // Extract content (first paragraph or non-proof div)
