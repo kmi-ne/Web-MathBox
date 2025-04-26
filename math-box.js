@@ -142,45 +142,43 @@ function processInternalReference(link) {
 }
 
 // Process cross-page reference
-function processCrossPageReference(link) {
+async function processCrossPageReference(link) {
     const href = link.getAttribute('href');
     if (!href.includes('#')) return; // Need a fragment identifier
-
     const [pagePath, fragment] = href.split('#');
     if (!fragment) return; // Need a valid fragment
 
     // Add class for cross-page styling
     link.classList.add('cross-page-ref');
 
+    // Fetch reference data immediately (not just on hover)
+    const refInfoPromise = fetchCrossPageReference(pagePath, fragment);
+
+    // Update link text as soon as data is available
+    refInfoPromise.then(refInfo => {
+        if (refInfo && (!link.textContent || link.textContent === '')) {
+            link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
+        }
+    }).catch(() => {
+        // Handle errors for invalid references
+        if (!link.textContent || link.textContent === '') {
+            link.classList.add('reference-error');
+            link.textContent = 'Invalid Reference';
+        }
+    });
+
     // Add tooltip behavior
     link.addEventListener('mouseover', async (e) => {
-        // Show loading tooltip
         tooltip.innerHTML = `<div class="loading-tooltip">Loading reference from ${pagePath}...</div>`;
         tooltip.classList.add('visible');
         positionTooltip(link);
 
-        // Try to get reference info
         try {
-            const refInfo = await fetchCrossPageReference(pagePath, fragment);
-
+            const refInfo = await refInfoPromise; // Reuse the existing promise
             if (refInfo) {
-                // Update tooltip with reference info
                 tooltip.innerHTML = `<strong>${refInfo.title}</strong><br>${refInfo.content}`;
-                positionTooltip(link);
-
-                // If link has no text content, set it to the reference title
-                if (!link.textContent || link.textContent === '') {
-                    link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
-                }
             } else {
-                // Reference not found
                 tooltip.innerHTML = `<div class="loading-tooltip">Reference not found on ${pagePath}</div>`;
-
-                // Mark as error if it has no custom text
-                if (!link.textContent || link.textContent === '') {
-                    link.classList.add('reference-error');
-                    link.textContent = 'Invalid Reference';
-                }
             }
         } catch (error) {
             tooltip.innerHTML = `<div class="loading-tooltip">Error loading reference: ${error.message}</div>`;
