@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Theorems - Page 2</title>
+    <link rel="stylesheet" href="math-box.css">
+    <script src="math-box.js"></script>
+</head>
+<body>
+    <h1>Mathematical Concepts - Page 2</h1>
+    
+    <div class="mbox thm" id="rolle" data-subtitle="Rolle's Theorem">
+        <p>Let $f: [a, b] \to \mathbb{R}$ be continuous on $[a, b]$ and differentiable on $(a, b)$. If $f(a) = f(b)$, then there exists a point $c \in (a, b)$ such that $f'(c) = 0$.</p>
+        <div class="proof">
+            <p>Since $f$ is continuous on the closed interval $[a, b]$, by the extreme value theorem, $f$ attains its maximum and minimum values on $[a, b]$.</p>
+            <p>If $f$ is constant on $[a, b]$, then $f'(x) = 0$ for all $x \in (a, b)$, and we can choose any $c \in (a, b)$.</p>
+            <p>If $f$ is not constant, then either its maximum or minimum must occur at some point $c \in (a, b)$ (since $f(a) = f(b)$).</p>
+            <p>At such a point $c$, we have $f'(c) = 0$ by Fermat's theorem.</p>
+        </div>
+    </div>
+    
+    <div class="mbox thm" id="mean_value" data-subtitle="Mean Value Theorem">
+        <p>Let $f: [a, b] \to \mathbb{R}$ be continuous on $[a, b]$ and differentiable on $(a, b)$. Then there exists a point $c \in (a, b)$ such that $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
+        <div class="proof">
+            <p>Define a new function $g(x) = f(x) - \frac{f(b) - f(a)}{b - a}(x - a) - f(a)$.</p>
+            <p>Then $g$ is continuous on $[a, b]$ and differentiable on $(a, b)$.</p>
+            <p>Furthermore, $g(a) = f(a) - f(a) = 0$ and $g(b) = f(b) - \frac{f(b) - f(a)}{b - a}(b - a) - f(a) = 0$.</p>
+            <p>By <a href="#rolle"></a>, there exists $c \in (a, b)$ such that $g'(c) = 0$.</p>
+            <p>Since $g'(x) = f'(x) - \frac{f(b) - f(a)}{b - a}$, we have $f'(c) = \frac{f(b) - f(a)}{b - a}$.</p>
+        </div>
+    </div>
+    
+    <div class="mbox thm" id="intermediate_value" data-subtitle="Intermediate Value Theorem">
+        <p>If $f: [a, b] \to \mathbb{R}$ is continuous and $f(a) < k < f(b)$ (or $f(a) > k > f(b)$), then there exists a point $c \in (a, b)$ such that $f(c) = k$.</p>
+        <div class="proof">
+            <p>Let $S = \{x \in [a, b] : f(x) \leq k\}$.</p>
+            <p>Since $f(a) < k$, we know that $a \in S$, so $S$ is non-empty.</p>
+            <p>Since $f(b) > k$, we know that $b \notin S$, so $S$ is bounded above by $b$.</p>
+            <p>By the completeness of the real numbers, $S$ has a supremum $c = \sup S$.</p>
+            <p>We claim that $f(c) = k$.</p>
+            <p>If $f(c) < k$, then by continuity of $f$, there exists $\delta > 0$ such that $f(x) < k$ for all $x \in (c - \delta, c + \delta) \cap [a, b]$.</p>
+            <p>But this means that $c + \min(\delta/2, b-c) \in S$, contradicting that $c = \sup S$.</p>
+            <p>If $f(c) > k$, then by continuity of $f$, there exists $\delta > 0$ such that $f(x) > k$ for all $x \in (c - \delta, c + \delta) \cap [a, b]$.</p>
+            <p>But this means that $\sup S \leq c - \delta < c$, contradicting that $c = \sup S$.</p>
+            <p>Therefore, $f(c) = k$.</p>
+        </div>
+    </div>
+
+    <h2>Cross-Page References</h2>
+    
+    <p>According to <a href="page1.html#bol_wei"></a>, every bounded sequence has a convergent subsequence.</p>
+    
+    <p>The <a href="page1.html#group_def">Group definition</a> is fundamental in abstract algebra.</p>
+    
+    <p>Let's try a reference to a non-existent definition: <a href="page1.html#non_existent"></a>.</p>
+    
+    <p><a href="page1.html">Go back to Page 1</a></p>
+</body>
+</html>

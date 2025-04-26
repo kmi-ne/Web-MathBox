@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Theorems - Page 1</title>
+    <link rel="stylesheet" href="math-box.css">
+    <script src="math-box.js"></script>
+</head>
+<body>
+    <h1>Mathematical Concepts - Page 1</h1>
+    
+    <div class="mbox axm" id="euclidean_parallel" data-subtitle="Parallel Postulate">
+        <p>Given a line and a point not on the line, there exists exactly one line through the point that is parallel to the given line.</p>
+    </div>
+    
+    <div class="mbox dfn" id="group_def" data-subtitle="Group">
+        <p>A group $(G, \cdot)$ is a set $G$ with a binary operation $\cdot$ satisfying the following properties:
+            <ol>
+                <li>Closure: For all $a, b \in G$, $a \cdot b \in G$.</li>
+                <li>Associativity: For all $a, b, c \in G$, $(a \cdot b) \cdot c = a \cdot (b \cdot c)$.</li>
+                <li>Identity: There exists an element $e \in G$ such that $e \cdot a = a \cdot e = a$ for all $a \in G$.</li>
+                <li>Inverse: For each $a \in G$, there exists an element $a^{-1} \in G$ such that $a \cdot a^{-1} = a^{-1} \cdot a = e$.</li>
+            </ol>
+        </p>
+    </div>
+
+    <p>As stated in <a href="#euclidean_parallel"></a>, there is only one parallel line through a given point. We can use this to prove several theorems in geometry.</p>
+    
+    <div class="mbox thm" id="bol_wei" data-subtitle="Bolzano-Weierstrass">
+        <p>Every bounded sequence in $\mathbb{R}^n$ has a convergent subsequence.</p>
+        <div class="proof">
+            <p>Let $(x_n)$ be a bounded sequence in $\mathbb{R}^n$. Then there exists $M > 0$ such that $\|x_n\| \leq M$ for all $n \in \mathbb{N}$.</p>
+            <p>We can use the nested intervals property to extract a convergent subsequence. First, divide the closed ball of radius $M$ centered at the origin into finitely many closed subsets. At least one of these subsets must contain infinitely many terms of the sequence...</p>
+            <p>Continuing this process yields a Cauchy subsequence, which must converge in $\mathbb{R}^n$.</p>
+        </div>
+    </div>
+
+    <p>The <a href="#bol_wei">Bolzano-Weierstrass theorem</a> is fundamental in analysis. Let's see an application:</p>
+    
+    <div class="mbox ex" id="bw_application">
+        <p>Consider the sequence $a_n = \cos(n)$ for $n \in \mathbb{N}$. This sequence is bounded since $|\cos(n)| \leq 1$ for all $n$. By <a href="#bol_wei"></a>, there exists a convergent subsequence.</p>
+    </div>
+
+    <h2>Cross-Page References</h2>
+    
+    <p>In calculus, the <a href="page2.html#mean_value"></a> is a key result for differentiable functions.</p>
+    
+    <p>The proof relies on the <a href="page2.html#rolle">Rolle's theorem</a>, which is a special case.</p>
+    
+    <p>For continuous functions, see the <a href="page2.html#intermediate_value">Intermediate Value Theorem</a>.</p>
+    
+    <p>Let's also try a reference to a non-existent theorem: <a href="page2.html#non_existent"></a>.</p>
+    
+    <p><a href="page2.html">Go to Page 2</a></p>
+</body>
+</html>
