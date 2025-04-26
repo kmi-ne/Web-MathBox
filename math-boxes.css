@@ -19,11 +19,14 @@
     margin-top: 0.75rem;
     padding-left: 1rem;
     border-left: 2px solid #ddd;
-    display: none; /* Hide by default */
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
 }
 
 .proof.expanded {
-    display: block; /* Show when expanded */
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
 }
 
 .proof-toggle {
@@ -58,6 +61,12 @@
     opacity: 1;
 }
 
+/* Loading indicator for cross-page references */
+.loading-ref {
+    color: #1890ff;
+    font-style: italic;
+}
+
 /* Error style for invalid references */
 .reference-error {
     color: #f5222d;
@@ -65,20 +74,39 @@
     cursor: not-allowed;
 }
 
-/* Cross-page reference styles */
-.cross-page-ref {
-    color: #1890ff;
-    text-decoration: none;
-    border-bottom: 1px dashed #1890ff;
+/* Remote tooltip styles */
+.remote-tooltip {
+    position: fixed;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    max-width: 350px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
-.cross-page-ref:hover {
-    color: #40a9ff;
+.remote-tooltip.visible {
+    opacity: 1;
 }
 
-/* Loading indicator for cross-page tooltips */
-.loading-tooltip {
-    padding: 0.25rem 0.5rem;
+.remote-tooltip .title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.25rem;
+}
+
+.remote-tooltip .content {
+    font-size: 0.9rem;
+}
+
+.remote-tooltip .page-info {
     font-style: italic;
-    color: #666;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    color: #888;
 }
