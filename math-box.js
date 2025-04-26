@@ -194,78 +194,49 @@ function processCrossPageReference(link) {
 
 // Fetch reference info from another page
 async function fetchCrossPageReference(pagePath, fragment) {
-    // Check cache first
     const cacheKey = `${pagePath}#${fragment}`;
-    if (crossPageCache[cacheKey]) {
-        return crossPageCache[cacheKey];
-    }
+    if (crossPageCache[cacheKey]) return crossPageCache[cacheKey];
 
     try {
-        // This uses the fetch API to get the HTML of the target page
         const response = await fetch(pagePath);
         if (!response.ok) throw new Error(`Failed to load ${pagePath}`);
-
         const html = await response.text();
-
-        // Create a temporary DOM to parse the HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // Look for the registry data
-        const registryScript = doc.querySelector('script[data-math-registry]');
-        let registry = null;
+        // Build registry from raw HTML elements
+        const mboxElements = Array.from(doc.querySelectorAll('.mbox'));
+        const tempRegistry = {};
 
-        if (registryScript) {
-            // The registry is directly available as JSON
-            try {
-                registry = JSON.parse(registryScript.textContent);
-            } catch (e) {
-                console.error('Failed to parse registry JSON:', e);
-            }
-        } else {
-            // Extract the registry from the target document
-            // In a real implementation, you might want to expose the registry via a data attribute
-            // or a global variable in a more robust way
-            const targetElement = doc.getElementById(fragment);
+        mboxElements.forEach((element, index) => {
+            const id = element.id;
+            const typeClass = Array.from(element.classList)
+                .find(cls => boxTypes[cls]);
+            if (!typeClass || !id) return;
 
-            if (targetElement && targetElement.classList.contains('mbox')) {
-                // Manual extraction of reference info
-                const typeClass = Array.from(targetElement.classList).find(cls => boxTypes[cls]);
-                if (typeClass) {
-                    // This is a simplified extraction - in production you'd want more robust parsing
-                    const strongElement = targetElement.querySelector('strong');
-                    const titleMatch = strongElement ? strongElement.textContent.match(/^(.*)\s(\d+)(?:\s\((.*)\))?\./) : null;
+            const subtitle = element.getAttribute('data-subtitle') || '';
+            const number = index + 1; // Numbering starts at 1
+            const titleText = subtitle 
+                ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+                : `${boxTypes[typeClass].name} ${number}`;
 
-                    if (titleMatch) {
-                        const type = typeClass;
-                        const number = parseInt(titleMatch[2]);
-                        const subtitle = titleMatch[3] || null;
-                        const titleText = subtitle ? `${boxTypes[type].name} ${number} (${subtitle})` : `${boxTypes[type].name} ${number}`;
+            // Extract content (first paragraph or non-proof div)
+            const contentElement = element.querySelector('p, div:not(.proof)');
+            const content = contentElement ? contentElement.innerHTML : '';
 
-                        // Get content (first paragraph or div)
-                        const contentElement = targetElement.querySelector('p, div:not(.proof)');
-                        const content = contentElement ? contentElement.innerHTML : '';
+            tempRegistry[id] = {
+                number,
+                type: typeClass,
+                title: titleText,
+                subtitle: subtitle,
+                content
+            };
+        });
 
-                        registry = {
-                            [fragment]: {
-                                number,
-                                type,
-                                title: titleText,
-                                subtitle,
-                                content
-                            }
-                        };
-                    }
-                }
-            }
+        if (tempRegistry[fragment]) {
+            crossPageCache[cacheKey] = tempRegistry[fragment];
+            return tempRegistry[fragment];
         }
-
-        if (registry && registry[fragment]) {
-            // Cache the result
-            crossPageCache[cacheKey] = registry[fragment];
-            return registry[fragment];
-        }
-
         return null;
     } catch (error) {
         console.error('Error fetching cross-page reference:', error);
