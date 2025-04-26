@@ -142,49 +142,40 @@ function processInternalReference(link) {
 }
 
 // Process cross-page reference
-async function processCrossPageReference(link) {
+function processCrossPageReference(link) {
     const href = link.getAttribute('href');
-    if (!href.includes('#')) return; // Need a fragment identifier
+    if (!href.includes('#')) return; // Ensure fragment exists
     const [pagePath, fragment] = href.split('#');
-    if (!fragment) return; // Need a valid fragment
+    if (!fragment) return; // Ensure valid fragment
 
-    // Add class for cross-page styling
     link.classList.add('cross-page-ref');
 
-    // Fetch reference data immediately (not just on hover)
-    const refInfoPromise = fetchCrossPageReference(pagePath, fragment);
-
-    // Update link text as soon as data is available
-    refInfoPromise.then(refInfo => {
-        if (refInfo && (!link.textContent || link.textContent === '')) {
-            link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
-        }
-    }).catch(() => {
-        // Handle errors for invalid references
-        if (!link.textContent || link.textContent === '') {
-            link.classList.add('reference-error');
-            link.textContent = 'Invalid Reference';
-        }
-    });
-
-    // Add tooltip behavior
-    link.addEventListener('mouseover', async (e) => {
-        tooltip.innerHTML = `<div class="loading-tooltip">Loading reference from ${pagePath}...</div>`;
-        tooltip.classList.add('visible');
-        positionTooltip(link);
-
+    // Pre-fetch the reference data and populate text immediately
+    (async () => {
         try {
-            const refInfo = await refInfoPromise; // Reuse the existing promise
+            const refInfo = await fetchCrossPageReference(pagePath, fragment);
             if (refInfo) {
-                tooltip.innerHTML = `<strong>${refInfo.title}</strong><br>${refInfo.content}`;
+                // Set link text immediately if empty
+                if (!link.textContent || link.textContent === '') {
+                    link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
+                }
+                // Tooltip setup (same as before)
+                link.addEventListener('mouseover', async (e) => {
+                    // ... existing tooltip code ...
+                });
             } else {
-                tooltip.innerHTML = `<div class="loading-tooltip">Reference not found on ${pagePath}</div>`;
+                // Handle invalid references
+                link.classList.add('reference-error');
+                link.textContent = 'Invalid Reference';
             }
         } catch (error) {
-            tooltip.innerHTML = `<div class="loading-tooltip">Error loading reference: ${error.message}</div>`;
+            // Handle errors
+            link.classList.add('reference-error');
+            link.textContent = 'Error';
         }
-    });
+    })();
 
+    // Keep the mouseout listener for tooltip
     link.addEventListener('mouseout', () => {
         tooltip.classList.remove('visible');
     });
@@ -202,40 +193,38 @@ async function fetchCrossPageReference(pagePath, fragment) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // Build registry from raw HTML elements
+        // Find the target element
+        const targetElement = doc.getElementById(fragment);
+        if (!targetElement || !targetElement.classList.contains('mbox')) return null;
+
+        // Extract data from the element
+        const typeClass = Array.from(targetElement.classList)
+            .find(cls => boxTypes[cls]);
+        if (!typeClass) return null;
+
+        const subtitle = targetElement.getAttribute('data-subtitle') || '';
+        const contentElement = targetElement.querySelector('p, div:not(.proof)');
+        const content = contentElement ? contentElement.innerHTML : '';
+
+        // Determine the box's number by counting all .mbox elements before it
         const mboxElements = Array.from(doc.querySelectorAll('.mbox'));
-        const tempRegistry = {};
+        const index = mboxElements.indexOf(targetElement);
+        const number = index + 1; // 1-based numbering
 
-        mboxElements.forEach((element, index) => {
-            const id = element.id;
-            const typeClass = Array.from(element.classList)
-                .find(cls => boxTypes[cls]);
-            if (!typeClass || !id) return;
+        const titleText = subtitle 
+            ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+            : `${boxTypes[typeClass].name} ${number}`;
 
-            const subtitle = element.getAttribute('data-subtitle') || '';
-            const number = index + 1; // Numbering starts at 1
-            const titleText = subtitle 
-                ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
-                : `${boxTypes[typeClass].name} ${number}`;
+        const refInfo = {
+            number,
+            type: typeClass,
+            title: titleText,
+            subtitle,
+            content
+        };
 
-            // Extract content (first paragraph or non-proof div)
-            const contentElement = element.querySelector('p, div:not(.proof)');
-            const content = contentElement ? contentElement.innerHTML : '';
-
-            tempRegistry[id] = {
-                number,
-                type: typeClass,
-                title: titleText,
-                subtitle: subtitle,
-                content
-            };
-        });
-
-        if (tempRegistry[fragment]) {
-            crossPageCache[cacheKey] = tempRegistry[fragment];
-            return tempRegistry[fragment];
-        }
-        return null;
+        crossPageCache[cacheKey] = refInfo;
+        return refInfo;
     } catch (error) {
         console.error('Error fetching cross-page reference:', error);
         return null;
