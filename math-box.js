@@ -144,38 +144,49 @@ function processInternalReference(link) {
 // Process cross-page reference
 function processCrossPageReference(link) {
     const href = link.getAttribute('href');
-    if (!href.includes('#')) return; // Ensure fragment exists
-    const [pagePath, fragment] = href.split('#');
-    if (!fragment) return; // Ensure valid fragment
+    if (!href.includes('#')) return; // Need a fragment identifier
 
+    const [pagePath, fragment] = href.split('#');
+    if (!fragment) return; // Need a valid fragment
+
+    // Add class for cross-page styling
     link.classList.add('cross-page-ref');
 
-    // Pre-fetch the reference data and populate text immediately
-    (async () => {
+    // Add tooltip behavior
+    link.addEventListener('mouseover', async (e) => {
+        // Show loading tooltip
+        tooltip.innerHTML = `<div class="loading-tooltip">Loading reference from ${pagePath}...</div>`;
+        tooltip.classList.add('visible');
+        positionTooltip(link);
+
+        // Try to get reference info
         try {
             const refInfo = await fetchCrossPageReference(pagePath, fragment);
+
             if (refInfo) {
-                // Set link text immediately if empty
+                // Update tooltip with reference info
+                tooltip.innerHTML = `<strong>${refInfo.title}</strong><br>${refInfo.content}`;
+                positionTooltip(link);
+
+                // If link has no text content, set it to the reference title
                 if (!link.textContent || link.textContent === '') {
                     link.textContent = `${boxTypes[refInfo.type].name} ${refInfo.number}`;
                 }
-                // Tooltip setup (same as before)
-                link.addEventListener('mouseover', async (e) => {
-                    // ... existing tooltip code ...
-                });
             } else {
-                // Handle invalid references
-                link.classList.add('reference-error');
-                link.textContent = 'Invalid Reference';
+                // Reference not found
+                tooltip.innerHTML = `<div class="loading-tooltip">Reference not found on ${pagePath}</div>`;
+
+                // Mark as error if it has no custom text
+                if (!link.textContent || link.textContent === '') {
+                    link.classList.add('reference-error');
+                    link.textContent = 'Invalid Reference';
+                }
             }
         } catch (error) {
-            // Handle errors
-            link.classList.add('reference-error');
-            link.textContent = 'Error';
+            tooltip.innerHTML = `<div class="loading-tooltip">Error loading reference: ${error.message}</div>`;
         }
-    })();
+    });
 
-    // Keep the mouseout listener for tooltip
     link.addEventListener('mouseout', () => {
         tooltip.classList.remove('visible');
     });
@@ -183,114 +194,50 @@ function processCrossPageReference(link) {
 
 // Fetch reference info from another page
 async function fetchCrossPageReference(pagePath, fragment) {
-    // Check cache first
     const cacheKey = `${pagePath}#${fragment}`;
-    if (crossPageCache[cacheKey]) {
-        return crossPageCache[cacheKey];
-    }
+    if (crossPageCache[cacheKey]) return crossPageCache[cacheKey];
 
     try {
-        // This uses the fetch API to get the HTML of the target page
         const response = await fetch(pagePath);
         if (!response.ok) throw new Error(`Failed to load ${pagePath}`);
-
         const html = await response.text();
-
-        // Create a temporary DOM to parse the HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-<<<<<<< HEAD
-        // Find the target element
-        const targetElement = doc.getElementById(fragment);
-        if (!targetElement || !targetElement.classList.contains('mbox')) return null;
-
-        // Extract data from the element
-        const typeClass = Array.from(targetElement.classList)
-            .find(cls => boxTypes[cls]);
-        if (!typeClass) return null;
-
-        const subtitle = targetElement.getAttribute('data-subtitle') || '';
-        const contentElement = targetElement.querySelector('p, div:not(.proof)');
-        const content = contentElement ? contentElement.innerHTML : '';
-
-        // Determine the box's number by counting all .mbox elements before it
+        // Build registry from raw HTML elements
         const mboxElements = Array.from(doc.querySelectorAll('.mbox'));
-        const index = mboxElements.indexOf(targetElement);
-        const number = index + 1; // 1-based numbering
+        const tempRegistry = {};
 
-        const titleText = subtitle 
-            ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
-            : `${boxTypes[typeClass].name} ${number}`;
+        mboxElements.forEach((element, index) => {
+            const id = element.id;
+            const typeClass = Array.from(element.classList)
+                .find(cls => boxTypes[cls]);
+            if (!typeClass || !id) return;
 
-        const refInfo = {
-            number,
-            type: typeClass,
-            title: titleText,
-            subtitle,
-            content
-        };
+            const subtitle = element.getAttribute('data-subtitle') || '';
+            const number = index + 1; // Numbering starts at 1
+            const titleText = subtitle 
+                ? `${boxTypes[typeClass].name} ${number} (${subtitle})` 
+                : `${boxTypes[typeClass].name} ${number}`;
 
-        crossPageCache[cacheKey] = refInfo;
-        return refInfo;
-=======
-        // Look for the registry data
-        const registryScript = doc.querySelector('script[data-math-registry]');
-        let registry = null;
+            // Extract content (first paragraph or non-proof div)
+            const contentElement = element.querySelector('p, div:not(.proof)');
+            const content = contentElement ? contentElement.innerHTML : '';
 
-        if (registryScript) {
-            // The registry is directly available as JSON
-            try {
-                registry = JSON.parse(registryScript.textContent);
-            } catch (e) {
-                console.error('Failed to parse registry JSON:', e);
-            }
-        } else {
-            // Extract the registry from the target document
-            // In a real implementation, you might want to expose the registry via a data attribute
-            // or a global variable in a more robust way
-            const targetElement = doc.getElementById(fragment);
+            tempRegistry[id] = {
+                number,
+                type: typeClass,
+                title: titleText,
+                subtitle: subtitle,
+                content
+            };
+        });
 
-            if (targetElement && targetElement.classList.contains('mbox')) {
-                // Manual extraction of reference info
-                const typeClass = Array.from(targetElement.classList).find(cls => boxTypes[cls]);
-                if (typeClass) {
-                    // This is a simplified extraction - in production you'd want more robust parsing
-                    const strongElement = targetElement.querySelector('strong');
-                    const titleMatch = strongElement ? strongElement.textContent.match(/^(.*)\s(\d+)(?:\s\((.*)\))?\./) : null;
-
-                    if (titleMatch) {
-                        const type = typeClass;
-                        const number = parseInt(titleMatch[2]);
-                        const subtitle = titleMatch[3] || null;
-                        const titleText = subtitle ? `${boxTypes[type].name} ${number} (${subtitle})` : `${boxTypes[type].name} ${number}`;
-
-                        // Get content (first paragraph or div)
-                        const contentElement = targetElement.querySelector('p, div:not(.proof)');
-                        const content = contentElement ? contentElement.innerHTML : '';
-
-                        registry = {
-                            [fragment]: {
-                                number,
-                                type,
-                                title: titleText,
-                                subtitle,
-                                content
-                            }
-                        };
-                    }
-                }
-            }
+        if (tempRegistry[fragment]) {
+            crossPageCache[cacheKey] = tempRegistry[fragment];
+            return tempRegistry[fragment];
         }
-
-        if (registry && registry[fragment]) {
-            // Cache the result
-            crossPageCache[cacheKey] = registry[fragment];
-            return registry[fragment];
-        }
-
         return null;
->>>>>>> parent of de8ac00 (Update math-box.js)
     } catch (error) {
         console.error('Error fetching cross-page reference:', error);
         return null;
